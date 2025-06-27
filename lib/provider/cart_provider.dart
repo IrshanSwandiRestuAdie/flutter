@@ -6,14 +6,14 @@ class Product {
   final String name;
   final double price;
   final String description;
-  final String imageUrl; // New field for image URL
+  final String imageUrl; 
 
   Product({
     required this.id,
     required this.name,
     required this.price,
     required this.description,
-    required this.imageUrl, // Include imageUrl in the constructor
+    required this.imageUrl, 
   });
 
   factory Product.fromDocument(DocumentSnapshot doc) {
@@ -24,7 +24,7 @@ class Product {
     description: doc['description'] ?? 'No description available',
     imageUrl: (doc.data() != null && (doc.data() as Map<String, dynamic>).containsKey('imageUrl'))
         ? doc['imageUrl']
-        : 'https://nbwjmjcsysehkhfwhqcz.supabase.co/storage/v1/object/public/img//load_image.jpg', // Default image if none provided
+        : 'https://nbwjmjcsysehkhfwhqcz.supabase.co/storage/v1/object/public/img//load_image.jpg', 
   );
 }
 }
@@ -53,7 +53,7 @@ class Cart with ChangeNotifier {
     } else {
       _items.add(CartItem(product: product));
     }
-    itemCountNotifier.value = _items.length; // Update item count
+    itemCountNotifier.value = _items.length; 
     notifyListeners();
   }
 
@@ -64,7 +64,7 @@ class Cart with ChangeNotifier {
 
   void clear() {
     _items.clear();
-    itemCountNotifier.value = 0; // Reset item count
+    itemCountNotifier.value = 0;
     notifyListeners();
   }
 }

@@ -40,7 +40,6 @@ class ProductListingPage extends StatelessWidget {
         icon: const Icon(Icons.logout),
         tooltip: 'Logout',
         onPressed: () {
-          // Implement your logout logic here
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => const LoginPage()),
@@ -107,7 +106,6 @@ class ProductCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Use the imageUrl from the product
               Image.network(
                 product.imageUrl,
                 fit: BoxFit.cover,
@@ -171,7 +169,6 @@ class ProductDetailPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Use the imageUrl from the product
               Image.network(
                 product.imageUrl,
                 height: 300,
@@ -271,7 +268,6 @@ class CartPage extends StatelessWidget {
               Text('Total : Rp ${cart.totalAmount.toStringAsFixed(2)}'),
               ElevatedButton(
                 onPressed: () {
-                  // Implement checkout functionality
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => CheckoutPage(cart: cart)),
@@ -330,15 +326,14 @@ class CheckoutPage extends StatelessWidget {
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                // Implement order confirmation logic here
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Terimakasih Telah Berbelanja!')),
                 );
-                cart.clear(); // Clear the cart after checkout
+                cart.clear(); 
                 Navigator.pushAndRemoveUntil(
                   context,
                   MaterialPageRoute(builder: (context) => const ProductListingPage()),
-                  (route) => false, // Remove all previous routes
+                  (route) => false, 
                 );
               },
               child: const Text('Buat Pesanan'),

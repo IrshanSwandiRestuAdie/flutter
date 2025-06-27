@@ -1,148 +1,116 @@
+import 'package:app_uas/mainpage.dart';
+import 'package:app_uas/provider/cart_provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:provider/provider.dart';
+import 'firebase_options.dart'; 
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform, 
+  );
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Firebase CRUD',
-      theme: ThemeData(primarySwatch: Colors.blue),
-      home: const HomePage(),
-      debugShowCheckedModeBanner: false,
-    );
-  }
-}
-
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
-  @override
-  State<HomePage> createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-  final TextEditingController _nameController = TextEditingController();
-  final CollectionReference users =
-      FirebaseFirestore.instance.collection('users');
-
-  Future<void> _addUser() async {
-    if (_nameController.text.isNotEmpty) {
-      await users.add({'name': _nameController.text});
-      _nameController.clear();
-    }
-  }
-
-  Future<void> _updateUser(String id, String newName) async {
-    await users.doc(id).update({'name': newName});
-  }
-
-  Future<void> _deleteUser(String id) async {
-    await users.doc(id).delete();
-  }
-
-  void _showEditDialog(String id, String currentName) {
-    final TextEditingController editController =
-        TextEditingController(text: currentName);
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Edit User'),
-        content: TextField(
-          controller: editController,
-          decoration: const InputDecoration(labelText: 'Name'),
+    return ChangeNotifierProvider(
+      create: (context) => Cart(),
+      child: MaterialApp(
+        title: 'Rexus Official Store',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+          visualDensity: VisualDensity.adaptivePlatformDensity,
         ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              _updateUser(id, editController.text);
-              Navigator.pop(context);
-            },
-            child: const Text('Save'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-        ],
+        home: const LoginPage(),
+        debugShowCheckedModeBanner: false,
       ),
     );
+  }
+}
+
+class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
+
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  bool isLoading = false;
+  String? error;
+
+  Future<void> login() async {
+    setState(() {
+      isLoading = true;
+      error = null;
+    });
+    try {
+      // Removed: await Firebase.initializeApp();
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
+      );
+      Navigator.pushReplacement(
+        // ignore: use_build_context_synchronously
+        context,
+        MaterialPageRoute(builder: (context) => const ProductListingPage()),
+      );
+    } on FirebaseAuthException catch (e) {
+      setState(() {
+        error = e.message;
+      });
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Resource Minecraft Top Up')),
+      appBar: AppBar(title: const Text('Login')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _nameController,
-                    decoration: const InputDecoration(labelText: 'Name'),
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.add),
-                  onPressed: _addUser,
-                ),
-              ],
+            TextField(
+              controller: emailController,
+              decoration: const InputDecoration(labelText: 'Email'),
             ),
-            const SizedBox(height: 20),
-            Expanded(
-              child: StreamBuilder<QuerySnapshot>(
-                stream: users.snapshots(),
-                builder: (context, snapshot) {
-                  if (snapshot.hasError) {
-                    return const Text('Error loading data');
-                  }
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const CircularProgressIndicator();
-                  }
-                  final docs = snapshot.data!.docs;
-                  return ListView.builder(
-                    itemCount: docs.length,
-                    itemBuilder: (context, index) {
-                      final doc = docs[index];
-                      return ListTile(
-                        title: Text(doc['name']),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon: const Icon(Icons.edit),
-                              onPressed: () =>
-                                  _showEditDialog(doc.id, doc['name']),
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.delete),
-                              onPressed: () => _deleteUser(doc.id),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(left: 8.0),
-                              child: Image.asset(
-                                'img/emerald.png',
-                                width: 32,
-                                height: 32,
-                                fit: BoxFit.cover,
-                              ),
-                            )
-                          ],
-                        ),
-                      );
-                    },
-                  );
-                },
+            TextField(
+              controller: passwordController,
+              decoration: const InputDecoration(labelText: 'Password'),
+              obscureText: true,
+            ),
+            if (error != null)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Text(error!, style: const TextStyle(color: Colors.red)),
               ),
+            ElevatedButton(
+              onPressed: isLoading ? null : login,
+              child: isLoading
+                  ? const CircularProgressIndicator()
+                  : const Text('Login'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const RegisterPage()),
+                );
+              },
+              child: const Text('Belum punya akun? Register'),
             ),
           ],
         ),
@@ -150,3 +118,87 @@ class _HomePageState extends State<HomePage> {
     );
   }
 }
+
+class RegisterPage extends StatefulWidget {
+  const RegisterPage({super.key});
+
+  @override
+  State<RegisterPage> createState() => _RegisterPageState();
+}
+
+class _RegisterPageState extends State<RegisterPage> {
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  bool isLoading = false;
+  String? error;
+
+  Future<void> register() async {
+    setState(() {
+      isLoading = true;
+      error = null;
+    });
+    try {
+      // Removed: await Firebase.initializeApp();
+      await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
+      );
+      Navigator.pushReplacement(
+        // ignore: use_build_context_synchronously
+        context,
+        MaterialPageRoute(builder: (context) => const ProductListingPage()),
+      );
+    } on FirebaseAuthException catch (e) {
+      setState(() {
+        error = e.message;
+      });
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Register')),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            TextField(
+              controller: emailController,
+              decoration: const InputDecoration(labelText: 'Email'),
+            ),
+            TextField(
+              controller: passwordController,
+              decoration: const InputDecoration(labelText: 'Password'),
+              obscureText: true,
+            ),
+            if (error != null)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Text(error!, style: const TextStyle(color: Colors.red)),
+              ),
+            ElevatedButton(
+              onPressed: isLoading ? null : register,
+              child: isLoading
+                  ? const CircularProgressIndicator()
+                  : const Text('Register'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('Sudah punya akun? Login'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+

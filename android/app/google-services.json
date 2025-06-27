@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "179983668883",
+    "firebase_url": "https://app-uas-e4559-default-rtdb.firebaseio.com",
     "project_id": "app-uas-e4559",
     "storage_bucket": "app-uas-e4559.firebasestorage.app"
   },
@@ -12,7 +13,12 @@
           "package_name": "com.example.app_uas"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "179983668883-a1eimpuh7v1e6t4e7cmk2m4gdi3221rb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyBnO6l32d6tw4Rt_7Ku1wdMDMcmNMOm7Hc"
@@ -20,7 +26,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "179983668883-a1eimpuh7v1e6t4e7cmk2m4gdi3221rb.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "179983668883-vb70g2kna6p8mc5lpulac7eheikd4kq9.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.appUas"
+              }
+            }
+          ]
         }
       }
     }

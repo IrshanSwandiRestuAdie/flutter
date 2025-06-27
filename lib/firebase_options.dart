@@ -17,10 +17,7 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      throw UnsupportedError(
-        'DefaultFirebaseOptions have not been configured for web - '
-        'you can reconfigure this by running the FlutterFire CLI again.',
-      );
+      return web;
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -33,10 +30,7 @@ class DefaultFirebaseOptions {
           'you can reconfigure this by running the FlutterFire CLI again.',
         );
       case TargetPlatform.windows:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for windows - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return windows;
       case TargetPlatform.linux:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for linux - '
@@ -54,6 +48,7 @@ class DefaultFirebaseOptions {
     appId: '1:179983668883:android:697d7fb90c8146bf3bdf66',
     messagingSenderId: '179983668883',
     projectId: 'app-uas-e4559',
+    databaseURL: 'https://app-uas-e4559-default-rtdb.firebaseio.com',
     storageBucket: 'app-uas-e4559.firebasestorage.app',
   );
 
@@ -62,7 +57,32 @@ class DefaultFirebaseOptions {
     appId: '1:179983668883:ios:11a8bc2e591bd3363bdf66',
     messagingSenderId: '179983668883',
     projectId: 'app-uas-e4559',
+    databaseURL: 'https://app-uas-e4559-default-rtdb.firebaseio.com',
     storageBucket: 'app-uas-e4559.firebasestorage.app',
+    iosClientId: '179983668883-vb70g2kna6p8mc5lpulac7eheikd4kq9.apps.googleusercontent.com',
     iosBundleId: 'com.example.appUas',
   );
+
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'AIzaSyApbc_EHYaS9Of_ED4kAQfWYKAyaY4Ag-Q',
+    appId: '1:179983668883:web:9d2ed9d9540aeb4c3bdf66',
+    messagingSenderId: '179983668883',
+    projectId: 'app-uas-e4559',
+    authDomain: 'app-uas-e4559.firebaseapp.com',
+    databaseURL: 'https://app-uas-e4559-default-rtdb.firebaseio.com',
+    storageBucket: 'app-uas-e4559.firebasestorage.app',
+    measurementId: 'G-6BDJTWJE8M',
+  );
+
+  static const FirebaseOptions windows = FirebaseOptions(
+    apiKey: 'AIzaSyApbc_EHYaS9Of_ED4kAQfWYKAyaY4Ag-Q',
+    appId: '1:179983668883:web:69b10a8593b61d573bdf66',
+    messagingSenderId: '179983668883',
+    projectId: 'app-uas-e4559',
+    authDomain: 'app-uas-e4559.firebaseapp.com',
+    databaseURL: 'https://app-uas-e4559-default-rtdb.firebaseio.com',
+    storageBucket: 'app-uas-e4559.firebasestorage.app',
+    measurementId: 'G-PJD13E95JE',
+  );
+
 }

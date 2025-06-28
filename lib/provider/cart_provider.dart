@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 
 class Product {
   final String id;
@@ -33,38 +34,75 @@ class CartItem {
   final Product product;
   int quantity;
 
-  CartItem({required this.product, this.quantity = 1});
+  CartItem({required this.product, required this.quantity});
 }
 
-class Cart with ChangeNotifier {
-  final List<CartItem> _items = [];
-  final ValueNotifier<int> itemCountNotifier = ValueNotifier<int>(0);
+class Cart extends ChangeNotifier {
+  List<CartItem> _items = [];
 
   List<CartItem> get items => _items;
 
-  void addItem(Product product) {
-    final existingItem = _items.firstWhere(
-      (item) => item.product.id == product.id,
-      orElse: () => CartItem(product: product, quantity: 0),
-    );
-
-    if (existingItem.quantity > 0) {
-      existingItem.quantity++;
-    } else {
-      _items.add(CartItem(product: product));
+  double get totalAmount {
+    double total = 0;
+    for (var item in _items) {
+      total += item.product.price * item.quantity;
     }
-    itemCountNotifier.value = _items.length; 
+    return total;
+  }
+
+  void addItem(Product product) {
+    final existingItemIndex = _items.indexWhere((item) => item.product.id == product.id);
+    if (existingItemIndex != -1) {
+      // Product already in cart, increase the quantity
+      _items[existingItemIndex].quantity++;
+    } else {
+      // Product not in cart, add a new item
+      _items.add(CartItem(product: product, quantity: 1));
+    }
     notifyListeners();
   }
 
-  double get totalAmount {
-    // ignore: avoid_types_as_parameter_names
-    return _items.fold(0.0, (sum, item) => sum + (item.product.price * item.quantity));
+  void removeItem(String productId) {
+    _items.removeWhere((item) => item.product.id == productId);
+    notifyListeners();
+  }
+
+  void increaseItemQuantity(String productId) {
+    final existingItemIndex = _items.indexWhere((item) => item.product.id == productId);
+    if (existingItemIndex != -1) {
+      _items[existingItemIndex].quantity++;
+      notifyListeners();
+    }
+  }
+
+  void decreaseItemQuantity(String productId) {
+    final existingItemIndex = _items.indexWhere((item) => item.product.id == productId);
+    if (existingItemIndex != -1) {
+      if (_items[existingItemIndex].quantity > 1) {
+        _items[existingItemIndex].quantity--;
+      } else {
+        removeItem(productId);
+      }
+      notifyListeners();
+    }
   }
 
   void clear() {
     _items.clear();
-    itemCountNotifier.value = 0;
     notifyListeners();
+  }
+
+  final ValueNotifier<int> _itemCountNotifier = ValueNotifier<int>(0);
+
+  ValueNotifier<int> get itemCountNotifier => _itemCountNotifier;
+
+  void _updateItemCount() {
+    _itemCountNotifier.value = items.length;
+  }
+
+  @override
+  void notifyListeners() {
+    _updateItemCount();
+    super.notifyListeners();
   }
 }

@@ -7,27 +7,29 @@ class Product {
   final String name;
   final double price;
   final String description;
-  final String imageUrl; 
+  final String imageUrl;
 
   Product({
     required this.id,
     required this.name,
     required this.price,
     required this.description,
-    required this.imageUrl, 
+    required this.imageUrl,
   });
 
   factory Product.fromDocument(DocumentSnapshot doc) {
-  return Product(
-    id: doc.id,
-    name: doc['name'] ?? 'No Name',
-    price: (doc['price'] ?? 0).toDouble(),
-    description: doc['description'] ?? 'No description available',
-    imageUrl: (doc.data() != null && (doc.data() as Map<String, dynamic>).containsKey('imageUrl'))
-        ? doc['imageUrl']
-        : 'https://nbwjmjcsysehkhfwhqcz.supabase.co/storage/v1/object/public/img//load_image.jpg', 
-  );
-}
+    return Product(
+      id: doc.id,
+      name: doc['name'] ?? 'No Name',
+      price: (doc['price'] ?? 0).toDouble(),
+      description: doc['description'] ?? 'No description available',
+      imageUrl:
+          (doc.data() != null &&
+                  (doc.data() as Map<String, dynamic>).containsKey('imageUrl'))
+              ? doc['imageUrl']
+              : 'https://nbwjmjcsysehkhfwhqcz.supabase.co/storage/v1/object/public/img//load_image.jpg',
+    );
+  }
 }
 
 class CartItem {
@@ -38,7 +40,7 @@ class CartItem {
 }
 
 class Cart extends ChangeNotifier {
-  List<CartItem> _items = [];
+  final List<CartItem> _items = [];
 
   List<CartItem> get items => _items;
 
@@ -51,12 +53,13 @@ class Cart extends ChangeNotifier {
   }
 
   void addItem(Product product) {
-    final existingItemIndex = _items.indexWhere((item) => item.product.id == product.id);
+    final existingItemIndex = _items.indexWhere(
+      (item) => item.product.id == product.id,
+    );
     if (existingItemIndex != -1) {
-      // Product already in cart, increase the quantity
+
       _items[existingItemIndex].quantity++;
     } else {
-      // Product not in cart, add a new item
       _items.add(CartItem(product: product, quantity: 1));
     }
     notifyListeners();
@@ -68,7 +71,9 @@ class Cart extends ChangeNotifier {
   }
 
   void increaseItemQuantity(String productId) {
-    final existingItemIndex = _items.indexWhere((item) => item.product.id == productId);
+    final existingItemIndex = _items.indexWhere(
+      (item) => item.product.id == productId,
+    );
     if (existingItemIndex != -1) {
       _items[existingItemIndex].quantity++;
       notifyListeners();
@@ -76,7 +81,9 @@ class Cart extends ChangeNotifier {
   }
 
   void decreaseItemQuantity(String productId) {
-    final existingItemIndex = _items.indexWhere((item) => item.product.id == productId);
+    final existingItemIndex = _items.indexWhere(
+      (item) => item.product.id == productId,
+    );
     if (existingItemIndex != -1) {
       if (_items[existingItemIndex].quantity > 1) {
         _items[existingItemIndex].quantity--;

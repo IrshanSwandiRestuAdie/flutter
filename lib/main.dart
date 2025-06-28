@@ -1,16 +1,16 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:app_uas/mainpage.dart';
 import 'package:app_uas/provider/cart_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
-import 'firebase_options.dart'; 
+import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform, 
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const MyApp());
 }
 
@@ -75,13 +75,11 @@ class MyApp extends StatelessWidget {
           textButtonTheme: TextButtonThemeData(
             style: TextButton.styleFrom(
               foregroundColor: Colors.green[700],
-              textStyle: const TextStyle(
-                fontWeight: FontWeight.bold,
-              ),
+              textStyle: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
         ),
-        home: const ProductListingPage(),
+        home: const LoginPage(),
       ),
     );
   }
@@ -105,7 +103,7 @@ class _LoginPageState extends State<LoginPage> {
       _isLoading = true;
       _errorMessage = null;
     });
-    
+
     try {
       await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: _emailController.text.trim(),
@@ -150,11 +148,12 @@ class _LoginPageState extends State<LoginPage> {
                       Image.asset(
                         'assets/logo.png',
                         height: 100,
-                        errorBuilder: (context, error, stackTrace) => const Icon(
-                          Icons.shopping_bag,
-                          size: 60,
-                          color: Colors.green,
-                        ),
+                        errorBuilder:
+                            (context, error, stackTrace) => const Icon(
+                              Icons.shopping_bag,
+                              size: 60,
+                              color: Colors.green,
+                            ),
                       ),
                       const SizedBox(height: 20),
                       Text(
@@ -170,14 +169,20 @@ class _LoginPageState extends State<LoginPage> {
                         controller: _emailController,
                         decoration: InputDecoration(
                           labelText: 'Email',
-                          prefixIcon: const Icon(Icons.email, color: Colors.green),
+                          prefixIcon: const Icon(
+                            Icons.email,
+                            color: Colors.green,
+                          ),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
                             borderSide: const BorderSide(color: Colors.green),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
-                            borderSide: const BorderSide(color: Colors.green, width: 2),
+                            borderSide: const BorderSide(
+                              color: Colors.green,
+                              width: 2,
+                            ),
                           ),
                         ),
                       ),
@@ -187,14 +192,20 @@ class _LoginPageState extends State<LoginPage> {
                         obscureText: true,
                         decoration: InputDecoration(
                           labelText: 'Password',
-                          prefixIcon: const Icon(Icons.lock, color: Colors.green),
+                          prefixIcon: const Icon(
+                            Icons.lock,
+                            color: Colors.green,
+                          ),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
                             borderSide: const BorderSide(color: Colors.green),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
-                            borderSide: const BorderSide(color: Colors.green, width: 2),
+                            borderSide: const BorderSide(
+                              color: Colors.green,
+                              width: 2,
+                            ),
                           ),
                         ),
                       ),
@@ -219,23 +230,26 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                             elevation: 3,
                           ),
-                          child: _isLoading
-                              ? const SizedBox(
-                                  width: 24,
-                                  height: 24,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          child:
+                              _isLoading
+                                  ? const SizedBox(
+                                    width: 24,
+                                    height: 24,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.white,
+                                      ),
+                                    ),
+                                  )
+                                  : const Text(
+                                    'LOGIN',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
                                   ),
-                                )
-                              : const Text(
-                                  'LOGIN',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                  ),
-                                ),
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -250,7 +264,9 @@ class _LoginPageState extends State<LoginPage> {
                             onPressed: () {
                               Navigator.push(
                                 context,
-                                MaterialPageRoute(builder: (context) => const RegisterPage()),
+                                MaterialPageRoute(
+                                  builder: (context) => const RegisterPage(),
+                                ),
                               );
                             },
                             child: const Text(
@@ -293,7 +309,7 @@ class _RegisterPageState extends State<RegisterPage> {
       _isLoading = true;
       _errorMessage = null;
     });
-    
+
     try {
       await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: _emailController.text.trim(),
@@ -338,11 +354,12 @@ class _RegisterPageState extends State<RegisterPage> {
                       Image.asset(
                         'assets/logo.png',
                         height: 100,
-                        errorBuilder: (context, error, stackTrace) => const Icon(
-                          Icons.shopping_bag,
-                          size: 60,
-                          color: Colors.green,
-                        ),
+                        errorBuilder:
+                            (context, error, stackTrace) => const Icon(
+                              Icons.shopping_bag,
+                              size: 60,
+                              color: Colors.green,
+                            ),
                       ),
                       const SizedBox(height: 20),
                       Text(
@@ -358,14 +375,20 @@ class _RegisterPageState extends State<RegisterPage> {
                         controller: _emailController,
                         decoration: InputDecoration(
                           labelText: 'Email',
-                          prefixIcon: const Icon(Icons.email, color: Colors.green),
+                          prefixIcon: const Icon(
+                            Icons.email,
+                            color: Colors.green,
+                          ),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
                             borderSide: const BorderSide(color: Colors.green),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
-                            borderSide: const BorderSide(color: Colors.green, width: 2),
+                            borderSide: const BorderSide(
+                              color: Colors.green,
+                              width: 2,
+                            ),
                           ),
                         ),
                       ),
@@ -375,14 +398,20 @@ class _RegisterPageState extends State<RegisterPage> {
                         obscureText: true,
                         decoration: InputDecoration(
                           labelText: 'Password',
-                          prefixIcon: const Icon(Icons.lock, color: Colors.green),
+                          prefixIcon: const Icon(
+                            Icons.lock,
+                            color: Colors.green,
+                          ),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
                             borderSide: const BorderSide(color: Colors.green),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
-                            borderSide: const BorderSide(color: Colors.green, width: 2),
+                            borderSide: const BorderSide(
+                              color: Colors.green,
+                              width: 2,
+                            ),
                           ),
                         ),
                       ),
@@ -407,23 +436,26 @@ class _RegisterPageState extends State<RegisterPage> {
                             ),
                             elevation: 3,
                           ),
-                          child: _isLoading
-                              ? const SizedBox(
-                                  width: 24,
-                                  height: 24,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          child:
+                              _isLoading
+                                  ? const SizedBox(
+                                    width: 24,
+                                    height: 24,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.white,
+                                      ),
+                                    ),
+                                  )
+                                  : const Text(
+                                    'REGISTER',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
                                   ),
-                                )
-                              : const Text(
-                                  'REGISTER',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                  ),
-                                ),
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -459,5 +491,3 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 }
-
-

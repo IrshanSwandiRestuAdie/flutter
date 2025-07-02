@@ -5,19 +5,26 @@ import 'package:app_uas/detail_produk.dart';
 import 'package:app_uas/login_register_page.dart';
 import 'package:app_uas/profil.dart';
 import 'package:app_uas/provider/cart_provider.dart';
+import 'package:app_uas/provider/product_provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-class ProductListingPage extends StatelessWidget {
+class ProductListingPage extends StatefulWidget {
   const ProductListingPage({super.key});
 
   @override
+  _ProductListingPageState createState() => _ProductListingPageState();
+}
+
+class _ProductListingPageState extends State<ProductListingPage> {
+  String selectedCategory = 'All'; // Default category
+  List<String> categories = ['All', 'mouse', 'keyboard', 'headset', 'lainnya']; // Example categories
+
+  @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
-    // ignore: unused_local_variable
-    final theme = Theme.of(context);
+    final user = FirebaseAuth.instance.currentUser ;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
@@ -98,41 +105,61 @@ class ProductListingPage extends StatelessWidget {
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: StreamBuilder<QuerySnapshot>(
-          stream: FirebaseFirestore.instance.collection('products').snapshots(),
-          builder: (context, snapshot) {
-            if (snapshot.hasError) {
-              return Center(child: Text('Error: ${snapshot.error}'));
-            }
-
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(
-                child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.green[700]!),
-                ),
-              );
-            }
-
-            return GridView.builder(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 1,
-                crossAxisSpacing: 8,
-                mainAxisSpacing: 8,
-                childAspectRatio: 0.8,
-              ),
-              itemCount: snapshot.data!.docs.length,
-              itemBuilder: (context, index) {
-                final product = Product.fromDocument(
-                  snapshot.data!.docs[index],
-                );
-                return ProductCard(product: product);
+        child: Column(
+          children: [
+            CategorySelector(
+              categories: categories,
+              selectedCategory: selectedCategory,
+              onCategorySelected: (category) {
+                setState(() {
+                  selectedCategory = category;
+                });
               },
-            );
-          },
+            ),
+            Expanded(
+              child: StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance.collection('products').snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  }
+
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.green[700]!),
+                      ),
+                    );
+                  }
+
+                  // Filter products based on selected category
+                  final filteredProducts = snapshot.data!.docs.where((doc) {
+                    final product = Product.fromDocument(doc);
+                    return selectedCategory == 'All' || product.category == selectedCategory;
+                  }).toList();
+
+                  return GridView.builder(
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 1,
+                      crossAxisSpacing: 8,
+                      mainAxisSpacing: 8,
+                      childAspectRatio: 0.8,
+                    ),
+                    itemCount: filteredProducts.length,
+                    itemBuilder: (context, index) {
+                      final product = Product.fromDocument(filteredProducts[index]);
+                      return ProductCard(product: product);
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
+}
 
   void _profilePopup(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
@@ -332,7 +359,7 @@ class ProductListingPage extends StatelessWidget {
       ),
     );
   }
-}
+
 
 class ProductCard extends StatelessWidget {
   final Product product;
@@ -421,6 +448,49 @@ class ProductCard extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class CategorySelector extends StatelessWidget {
+  final List<String> categories;
+  final String selectedCategory;
+  final ValueChanged<String> onCategorySelected;
+
+  const CategorySelector({
+    super.key,
+    required this.categories,
+    required this.selectedCategory,
+    required this.onCategorySelected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: categories.map((category) {
+          final isSelected = category == selectedCategory;
+          return GestureDetector(
+            onTap: () => onCategorySelected(category),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              margin: const EdgeInsets.symmetric(horizontal: 4),
+              decoration: BoxDecoration(
+                color: isSelected ? Colors.green : Colors.grey[300],
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                category,
+                style: TextStyle(
+                  color: isSelected ? Colors.white : Colors.black,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          );
+        }).toList(),
       ),
     );
   }

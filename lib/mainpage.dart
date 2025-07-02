@@ -1,5 +1,4 @@
 // ignore_for_file: library_private_types_in_public_api, use_build_context_synchronously, deprecated_member_use
-
 import 'package:app_uas/cart_page.dart';
 import 'package:app_uas/detail_produk.dart';
 import 'package:app_uas/login_register_page.dart';
@@ -19,8 +18,8 @@ class ProductListingPage extends StatefulWidget {
 }
 
 class _ProductListingPageState extends State<ProductListingPage> {
-  String selectedCategory = 'All'; // Default category
-  List<String> categories = ['All', 'mouse', 'keyboard', 'headset', 'lainnya']; // Example categories
+  String selectedCategory = 'All'; 
+  List<String> categories = ['All', 'mouse', 'keyboard', 'headset', 'lainnya'];
 
   @override
   Widget build(BuildContext context) {
@@ -131,8 +130,6 @@ class _ProductListingPageState extends State<ProductListingPage> {
                       ),
                     );
                   }
-
-                  // Filter products based on selected category
                   final filteredProducts = snapshot.data!.docs.where((doc) {
                     final product = Product.fromDocument(doc);
                     return selectedCategory == 'All' || product.category == selectedCategory;
@@ -359,7 +356,6 @@ class _ProductListingPageState extends State<ProductListingPage> {
       ),
     );
   }
-
 
 class ProductCard extends StatelessWidget {
   final Product product;

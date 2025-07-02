@@ -1,9 +1,14 @@
 // ignore_for_file: use_build_context_synchronously
-
+import 'dart:io';
 import 'package:app_uas/mainpage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+// Only import dart:html if running on web
+// ignore: avoid_web_libraries_in_flutter, deprecated_member_use
+import 'dart:html' as html;
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -37,6 +42,27 @@ class _LoginPageState extends State<LoginPage> {
       setState(() => _errorMessage = e.message);
     } finally {
       setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _resetPassword() async {
+    String email = _emailController.text.trim();
+    if (email.isEmpty) {
+      setState(() {
+        _errorMessage = "Please enter your email address.";
+      });
+      return;
+    }
+
+    try {
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Password reset email sent! Check your inbox."),
+        ),
+      );
+    } on FirebaseAuthException catch (e) {
+      setState(() => _errorMessage = e.message);
     }
   }
 
@@ -168,6 +194,17 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ),
                       const SizedBox(height: 16),
+                      TextButton(
+                        onPressed: _resetPassword,
+                        child: const Text(
+                          'Forgot Password?',
+                          style: TextStyle(
+                            color: Colors.green,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -219,6 +256,35 @@ class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController _passwordController = TextEditingController();
   bool _isLoading = false;
   String? _errorMessage;
+  XFile? _imageFile; 
+
+  Future<void> _pickImage() async {
+    if (kIsWeb) {
+      final html.FileUploadInputElement uploadInput =
+          html.FileUploadInputElement();
+      uploadInput.accept = 'image/*'; 
+      uploadInput.click();
+
+      uploadInput.onChange.listen((e) {
+        final files = uploadInput.files;
+        if (files!.isNotEmpty) {
+          final reader = html.FileReader();
+          reader.readAsDataUrl(files[0]); 
+          reader.onLoadEnd.listen((e) {
+            setState(() {
+              _imageFile = XFile(reader.result as String);
+            });
+          });
+        }
+      });
+    } else {
+      final ImagePicker picker = ImagePicker();
+      final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+      setState(() {
+        _imageFile = image; 
+      });
+    }
+  }
 
   Future<void> _register() async {
     setState(() {
@@ -227,23 +293,22 @@ class _RegisterPageState extends State<RegisterPage> {
     });
 
     try {
-      // Create user with email and password
       UserCredential userCredential = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(
             email: _emailController.text.trim(),
             password: _passwordController.text.trim(),
           );
-
-      // Save username to Firestore
       await FirebaseFirestore.instance
           .collection('users')
           .doc(userCredential.user!.uid)
           .set({
             'username': _usernameController.text.trim(),
             'email': _emailController.text.trim(),
+            'profileImage':
+                kIsWeb
+                    ? _imageFile?.path
+                    : _imageFile?.path, 
           });
-
-      // Navigate to login page
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const LoginPage()),
@@ -295,6 +360,32 @@ class _RegisterPageState extends State<RegisterPage> {
                         ),
                       ),
                       const SizedBox(height: 24),
+                      GestureDetector(
+                        onTap: _pickImage,
+                        child: CircleAvatar(
+                          radius: 50,
+                          backgroundColor: Colors.grey[300],
+                          backgroundImage:
+                              kIsWeb && _imageFile != null
+                                  ? NetworkImage(
+                                    _imageFile!.path,
+                                  ) 
+                                  : _imageFile != null
+                                  ? FileImage(
+                                    File(_imageFile!.path),
+                                  ) 
+                                  : null,
+                          child:
+                              _imageFile == null
+                                  ? const Icon(
+                                    Icons.camera_alt,
+                                    color: Colors.green,
+                                    size: 50,
+                                  )
+                                  : null,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
                       TextField(
                         controller: _usernameController,
                         decoration: InputDecoration(

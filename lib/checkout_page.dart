@@ -1,5 +1,4 @@
 // ignore_for_file: library_private_types_in_public_api
-
 import 'package:app_uas/mainpage.dart';
 import 'package:app_uas/provider/cart_provider.dart';
 import 'package:flutter/material.dart';
@@ -24,7 +23,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Konfirmasi Pesanan'),
-        backgroundColor: Colors.green, // Warna hijau
+        backgroundColor: Colors.green, 
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

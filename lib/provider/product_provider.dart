@@ -6,7 +6,7 @@ class Product {
   final double price;
   final String description;
   final String imageUrl;
-  final String category; // Add the category field
+  final String category; 
 
   Product({
     required this.id,
@@ -14,7 +14,7 @@ class Product {
     required this.price,
     required this.description,
     required this.imageUrl,
-    required this.category, // Include category in the constructor
+    required this.category,
   });
 
   factory Product.fromDocument(DocumentSnapshot doc) {
@@ -27,7 +27,7 @@ class Product {
               (doc.data() as Map<String, dynamic>).containsKey('imageUrl'))
           ? doc['imageUrl']
           : 'https://nbwjmjcsysehkhfwhqcz.supabase.co/storage/v1/object/public/img//load_image.jpg',
-      category: doc['category'] ?? 'Uncategorized', // Add category initialization
+      category: doc['category'] ?? 'Uncategorized', 
     );
   }
 }

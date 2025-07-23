@@ -1,11 +1,8 @@
-// ignore_for_file: use_build_context_synchronously
-// ignore: deprecated_member_use, avoid_web_libraries_in_flutter
-import 'dart:async';
-// ignore: deprecated_member_use, avoid_web_libraries_in_flutter
-import 'dart:html' as html; // For web-specific functionality
+// ignore_for_file: avoid_print, use_build_context_synchronously
+
+import 'dart:convert'; 
 import 'package:app_uas/login_register_page.dart';
 import 'package:app_uas/settings_page.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -13,68 +10,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
 
-  Future<String> _blobToDataUrl(String blobUrl) async {
-    try {
-      final response = await html.HttpRequest.request(blobUrl, responseType: 'blob');
-      final blob = response.response;
-      final completer = Completer<String>();
-      final reader = html.FileReader();
-      reader.onLoadEnd.listen((e) {
-        completer.complete(reader.result as String);
-      });
-      reader.readAsDataUrl(blob as html.Blob);
-      return await completer.future;
-    } catch (e) {
-      debugPrint('Error converting blob to data URL: $e');
-      return '';
-    }
-  }
-
-  Stream<Widget> _buildProfileImage(dynamic imageSource) async* {
-    final defaultWidget = const Icon(Icons.person, size: 40, color: Colors.grey);
-
-    if (imageSource == null) {
-      yield defaultWidget;
-      return;
-    }
-
-    if (kIsWeb && imageSource.toString().startsWith('blob:')) {
-      try {
-        final dataUrl = await _blobToDataUrl(imageSource);
-        yield dataUrl.isNotEmpty
-            ? Image.network(
-                dataUrl,
-                width: 80,
-                height: 80,
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => defaultWidget,
-              )
-            : defaultWidget;
-        return;
-      } catch (e) {
-        debugPrint('Error loading blob image: $e');
-        yield defaultWidget;
-        return;
-      }
-    } else if (imageSource.toString().startsWith('http') || 
-               imageSource.toString().startsWith('data:')) {
-      yield Image.network(
-        imageSource.toString(),
-        width: 80,
-        height: 80,
-        fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) => defaultWidget,
-      );
-      return;
-    }
-
-    yield defaultWidget;
-    return;
-  }
-
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
+    final user = FirebaseAuth.instance.currentUser ;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Profil')),
@@ -100,45 +38,35 @@ class ProfilePage extends StatelessWidget {
                 final profileImage = data?['profileImage'];
                 final photoUrl = user?.photoURL;
 
+              
+                print('Profile Image URL: $profileImage');
+                print('User  Photo URL: $photoUrl');
+
                 return Row(
                   children: [
                     CircleAvatar(
                       radius: 40,
-                      child: ClipOval(
-                        child: FutureBuilder<String?>(
-                          future: kIsWeb && (profileImage?.startsWith('blob:') ?? false)
-                              ? _blobToDataUrl(profileImage!)
-                              : Future.value(profileImage ?? photoUrl),
-                          builder: (context, asyncSnapshot) {
-                            if (asyncSnapshot.connectionState == ConnectionState.waiting) {
-                              return const CircularProgressIndicator();
-                            }
-                            return StreamBuilder<Widget>(
-                              stream: _buildProfileImage(asyncSnapshot.data ?? photoUrl),
-                              builder: (context, imageSnapshot) {
-                                if (imageSnapshot.connectionState == ConnectionState.waiting) {
-                                  return const CircularProgressIndicator();
-                                }
-                                return imageSnapshot.data ??
-                                    const Icon(Icons.person, size: 40, color: Colors.grey);
-                              },
-                            );
-                          },
-                        ),
-                      ),
+                      backgroundImage: (profileImage != null && profileImage.isNotEmpty)
+                          ? (profileImage.startsWith('data:image/')
+                              ? MemoryImage(base64Decode(profileImage.split(',').last)) 
+                              : NetworkImage(profileImage))
+                          : (photoUrl != null ? NetworkImage(photoUrl) : null),
+                      child: (profileImage == null && photoUrl == null)
+                          ? const Icon(Icons.person, size: 40, color: Colors.grey)
+                          : null,
                     ),
                     const SizedBox(width: 16),
                     Expanded(
                       child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                        (data?['username'] as String?) ?? user?.displayName ?? 'User',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                        ),
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            (data?['username'] as String?) ?? user?.displayName ?? 'User  ',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
                           const SizedBox(height: 4),
                           Text(
                             user?.email ?? 'user@example.com',
@@ -163,8 +91,6 @@ class ProfilePage extends StatelessWidget {
                 color: Colors.grey[800],
               ),
             ),
-            const SizedBox(height: 16),
-            
             const SizedBox(height: 16),
             _buildMenuItem(
               icon: Icons.settings,
@@ -216,7 +142,3 @@ class ProfilePage extends StatelessWidget {
     );
   }
 }
-
-
-
-
